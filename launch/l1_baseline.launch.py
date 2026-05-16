@@ -33,6 +33,7 @@ def generate_launch_description():
             cmd=['ros2', 'bag', 'play', bag_path, '--clock'],
             output='screen'
         ),
+        
 
         # RViz
         Node(
