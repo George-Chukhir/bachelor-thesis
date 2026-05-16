@@ -27,9 +27,36 @@ def generate_launch_description():
 
         # 1. ROSBag (Legged odometry, IMU, LiDAR и MO-CAP)
         ExecuteProcess(
-            cmd=['ros2', 'bag', 'play', bag_path, '--clock'],
+            cmd=['ros2', 'bag', 'play', bag_path, '--clock', '--remap', '/tf_static:=/tf_static_old'],
             output='screen'
+
         ),
+
+        ###
+        #Static TFs
+        ###
+
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='base_link_to_imu_link',
+            arguments=['--x', '0', '--y', '-0.02341', '--z', '0.04927', '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
+                      '--frame-id', 'base_link', '--child-frame-id', 'imu_link'],
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+    
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='correct_velodyne_tf',
+            arguments=['0.3', '0.0', '0.4', '0.0', '0.0', '0.0', 'base_link', 'velodyne'],
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+
+
+        ###
+        # l1 - Legged Odometry (Raw)
+        ###
 
         # 2. Retranslator for creating a constant path (nav_msgs/Path) from Level 1 Odometry (Raw Legged Odometry)
         Node(
@@ -39,6 +66,11 @@ def generate_launch_description():
             parameters=[{'odom_topic': '/robot/base/odom', 'path_topic': '/trajectory/l1', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
         ),
 
+
+        ### 
+        # l2 - Legged Odometry + IMU (EKF)
+        ###
+        
         # 3. Node EKF for layer 2 (Leg Odometry + IMU)
         Node(
             package='robot_localization',
@@ -56,8 +88,11 @@ def generate_launch_description():
             parameters=[{'odom_topic': '/odometry/filtered_l2', 'path_topic': '/trajectory/l2', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
         ),
 
-        # 5. Level 3 (KISS-ICP + EKF)
-        # a) KISS-ICP node (Subscribing directly to /velodyne_points from the bag)
+
+        ###
+        # l3 - Legged Odometry + IMU + KISS-ICP + EKF
+        ###
+
         Node(
             package='kiss_icp',
             executable='kiss_icp_node',
@@ -67,12 +102,29 @@ def generate_launch_description():
                 ('odometry', '/kiss/odometry'),
             ],
             parameters=[{
-                'lidar_odom_frame': 'odom',
                 'base_frame': 'base_link',
+                'lidar_odom_frame': 'odom',
                 'publish_odom_tf': False,
-                'max_range': 20.0,
-                'min_range': 0.3,
-                'deskew': True,
+                'data.max_range': 20.0,
+                'data.min_range': 0.5,
+                'data.deskew': False,
+                'position_covariance': 0.005,
+                'orientation_covariance': 0.005,
+            }],
+        ),
+
+
+
+        # raw KISS-ICP
+        Node(
+            package='b2_thesis_fusion',
+            executable='path_tracker',
+            name='tracker_kiss_raw',
+            parameters=[{
+                'odom_topic': '/kiss/odometry', 
+                'path_topic': '/trajectory/kiss_raw', 
+                'frame_id': 'odom', 
+                'use_sim_time': use_sim_time
             }],
         ),
 
