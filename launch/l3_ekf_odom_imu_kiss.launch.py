@@ -30,7 +30,7 @@ def generate_launch_description():
         ),
 
         ExecuteProcess(
-            cmd=['ros2', 'bag', 'play', bag_path, '--clock',  '--delay', '3.0', '--remap', '/tf_static:=/tf_static_old', '--remap', '/tf:=/tf_old'],
+            cmd=['ros2', 'bag', 'play', bag_path, '--clock', '--remap', '/tf_static:=/tf_static_old', '--remap', '/tf:=/tf_old'],
             output='screen'
         ),
 

@@ -1,8 +1,3 @@
-"""KISS-ICP for B2 pipeline (missions-cwb.4).
-
-publish_odom_tf:=false - EKF publishes odom->base_link.
-Input: /velodyne_points. Output: /kiss/odometry only. No TF broadcast from KISS-ICP.
-"""
 import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
