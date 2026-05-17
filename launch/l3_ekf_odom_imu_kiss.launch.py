@@ -98,7 +98,11 @@ def generate_launch_description():
             package='b2_thesis_fusion',
             executable='path_tracker',
             name='tracker_l3',
-            parameters=[{'odom_topic': '/odometry/filtered_l3', 'path_topic': '/trajectory/l3', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
+            parameters=[{'odom_topic': '/odometry/filtered_l3', 
+                         'path_topic': '/trajectory/l3', 
+                         'frame_id': 'odom', 
+                         'use_sim_time': use_sim_time, 
+                          'output_tum_file': '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/l3_traj.tum'}],
         ),
 
 

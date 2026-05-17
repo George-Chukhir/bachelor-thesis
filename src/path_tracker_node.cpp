@@ -40,12 +40,6 @@ public:
                 tum_stream_ << std::fixed << std::setprecision(9);
             }
         }
-        if (!pose_topic_.empty()) {
-            pose_subscriber_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
-                pose_topic_, rclcpp::SensorDataQoS(),
-                std::bind(&PathTrackerNode::poseCallback, this, std::placeholders::_1));
-        }
-
 
 
         tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -77,90 +71,43 @@ public:
     }
 
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg){
-        //orientation issue 
-        if (!initialized_) {
-            try {
-                // Use the exact timestamp of the first odometry message to get the true initial transform
-                auto tf_msg = tf_buffer_->lookupTransform(frame_id_, robot_frame_, msg->header.stamp, rclcpp::Duration::from_seconds(1.0));
-                
-                tf2::Transform t_tf_initial;
-                tf2::fromMsg(tf_msg.transform, t_tf_initial);
-                flattenPose(t_tf_initial); // Forcing 2D
-                
-                tf2::Transform t_odom_initial;
-                tf2::fromMsg(msg->pose.pose, t_odom_initial);
-                flattenPose(t_odom_initial); // Forcing 2D
-                
-                // Calculates the full transform matrix (translation AND rotation alignment)
-                t_align_ = t_tf_initial * t_odom_initial.inverse();
-                
-                initialized_ = true;
-                RCLCPP_INFO(this->get_logger(), "Trajectory %s fully aligned (translation + rotation) to TF %s!", 
-                            odom_topic_.c_str(), robot_frame_.c_str());
-            } catch (const tf2::TransformException & ex) {
-                RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF alignment: %s", ex.what());
-                return;
+        try {
+            // Every time we get odom->base_link, we ask for global position of robot (relative to "map") 
+            // frame_id_ will be "odom" for L1-L3, and "map" для L4 (launch params)
+            auto tf_msg = tf_buffer_->lookupTransform(frame_id_, robot_frame_, msg->header.stamp, rclcpp::Duration::from_seconds(0.05));
+
+            geometry_msgs::msg::PoseStamped path_pose;
+            path_pose.header.stamp = msg->header.stamp;
+            path_pose.header.frame_id = frame_id_;
+
+
+            path_pose.pose.position.x = tf_msg.transform.translation.x;
+            path_pose.pose.position.y = tf_msg.transform.translation.y;
+            path_pose.pose.position.z = tf_msg.transform.translation.z;
+            path_pose.pose.orientation = tf_msg.transform.rotation;
+
+            // Draw path in RViz
+            path_msg_.poses.push_back(path_pose);
+            path_msg_.header.stamp = msg->header.stamp; 
+            path_publisher_->publish(path_msg_);
+
+            // 2. Save the TUM for evo
+            if (tum_stream_.is_open()) {
+                double time_sec = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
+                tum_stream_ << std::fixed << std::setprecision(9) << time_sec << " "
+                            << path_pose.pose.position.x << " "
+                            << path_pose.pose.position.y << " "
+                            << path_pose.pose.position.z << " "
+                            << path_pose.pose.orientation.x << " "
+                            << path_pose.pose.orientation.y << " "
+                            << path_pose.pose.orientation.z << " "
+                            << path_pose.pose.orientation.w << "\n";
             }
-
-
-
-        }
-        
-        // Apply full transformation matrix to current pose
-        tf2::Transform t_odom_current;
-        tf2::fromMsg(msg->pose.pose, t_odom_current);
-        flattenPose(t_odom_current); // Forcing 2D
-        
-        tf2::Transform t_aligned_current = t_align_ * t_odom_current;
-        flattenPose(t_aligned_current); // Ensure final outcome doesn't have Z artifacts
-        
-        geometry_msgs::msg::PoseStamped path_pose;
-        path_pose.header = msg->header;
-        path_pose.header.frame_id = frame_id_;
-        tf2::toMsg(t_aligned_current, path_pose.pose);
-        
-        path_msg_.poses.push_back(path_pose);
-        path_msg_.header.stamp = msg->header.stamp; 
-        
-        path_publisher_->publish(path_msg_);
-        
-        if (tum_stream_.is_open()) {
-            double time_sec = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
-            tum_stream_ << time_sec << " "
-                        << path_pose.pose.position.x << " "
-                        << path_pose.pose.position.y << " "
-                        << path_pose.pose.position.z << " "
-                        << path_pose.pose.orientation.x << " "
-                        << path_pose.pose.orientation.y << " "
-                        << path_pose.pose.orientation.z << " "
-                        << path_pose.pose.orientation.w << "\n";
-        }
-
-    }    
-
-    
-    void poseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg) {
-        geometry_msgs::msg::PoseStamped path_pose;
-        path_pose.header = msg->header;
-        path_pose.header.frame_id = frame_id_;
-        path_pose.pose = msg->pose.pose;
-
-        path_msg_.poses.push_back(path_pose);
-        path_msg_.header.stamp = msg->header.stamp; 
-        path_publisher_->publish(path_msg_);
-
-        if (tum_stream_.is_open()) {
-            double time_sec = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
-            tum_stream_ << time_sec << " "
-                        << path_pose.pose.position.x << " "
-                        << path_pose.pose.position.y << " "
-                        << path_pose.pose.position.z << " "
-                        << path_pose.pose.orientation.x << " "
-                        << path_pose.pose.orientation.y << " "
-                        << path_pose.pose.orientation.z << " "
-                        << path_pose.pose.orientation.w << "\n";
+        } catch (const tf2::TransformException & ex) {
+            RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Waiting for TF alignment: %s", ex.what());
         }
     }
+
 
 private:
     std::string odom_topic_, path_topic_, frame_id_, robot_frame_;

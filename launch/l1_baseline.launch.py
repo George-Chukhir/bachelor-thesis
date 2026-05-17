@@ -62,7 +62,11 @@ def generate_launch_description():
             package='b2_thesis_fusion',
             executable='path_tracker',
             name='tracker_l1',
-            parameters=[{'odom_topic': '/robot/base/odom', 'path_topic': '/trajectory/l1', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
+            parameters=[{'odom_topic': '/robot/base/odom', 
+                         'path_topic': '/trajectory/l1', 
+                         'frame_id': 'odom', 
+                         'use_sim_time': use_sim_time, 
+                         'output_tum_file': '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/l1_traj.tum'}],
         ),
         
 
