@@ -1,0 +1,40 @@
+# FASTLIO2 settings tuned for B2 Velodyne + IMU bridge (/imu/data).
+# Uses PointCloud2 input and keeps TF disabled by default to avoid conflict
+# with EKF (ekf_node publishes odom -> base_link in this stack).
+
+# lio_node expects: 1=Livox(CustomMsg), 2=PointCloud2(Velodyne)
+lidar_type: 2
+imu_topic: /imu/data_sync
+lidar_topic: /velodyne_points
+body_frame: base_link
+world_frame: odom
+print_time_cost: false
+publish_tf: true
+
+lidar_filter_num: 2
+lidar_min_range: 0.5
+lidar_max_range: 40.0
+scan_resolution: 0.15
+map_resolution: 0.3
+
+cube_len: 300
+det_range: 60
+move_thresh: 1.5
+
+na: 0.1
+ng: 0.1
+nba: 0.001
+nbg: 0.001
+
+imu_init_num: 100
+near_search_num: 5
+ieskf_max_iter: 5
+
+gravity_align: true
+esti_il: true
+
+# B2 extrinsic from existing base_link -> imu_link static TF.
+r_il: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+t_il: [-0.011, -0.02329, 0.04412]
+
+lidar_cov_inv: 1000.0
