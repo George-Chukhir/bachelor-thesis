@@ -15,7 +15,7 @@ def generate_launch_description():
     )
     
     ekf_config_l2 = os.path.join(b2_fusion_dir, 'config', 'ekf_l2.yaml')
-    rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'vlp16_view.rviz') 
+    rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'config_l2.rviz') 
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -29,15 +29,38 @@ def generate_launch_description():
             description='Path to the raw rosbag'
         ),
 
-        # Нода проигрывания rosbag-файла 
         ExecuteProcess(
-            cmd=['ros2', 'bag', 'play', bag_path, '--clock'],
+            cmd=['ros2', 'bag', 'play', bag_path, '--clock',  '--delay', '3.0', '--remap', '/tf_static:=/tf_static_old', '--remap', '/tf:=/tf_old'],
             output='screen'
         ),
 
-        # L2: Extended Kalman Filter (robot_localization)
-        # /robot/base/odom + /imu/data ==> /odometry/filtered
-        # TF: odom_filtered -> base_link
+
+        ###
+        #Static TFs
+        ###
+
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='base_link_to_imu_link',
+            arguments=['--x', '0', '--y', '-0.02341', '--z', '0.04927', '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
+                      '--frame-id', 'base_link', '--child-frame-id', 'imu_link'],
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+    
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='correct_velodyne_tf',
+            arguments=['0.3', '0.0', '0.4', '0.0', '0.0', '0.0', 'base_link', 'velodyne'],
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+
+
+        ### 
+        # l2 - Legged Odometry + IMU (EKF)
+        ###
+        
         Node(
             package='robot_localization',
             executable='ekf_node',
@@ -45,9 +68,17 @@ def generate_launch_description():
             output='screen',
             parameters=[ekf_config_l2],
             remappings=[
-                ('odometry/filtered', 'odometry/filtered_l2')
+                ('odometry/filtered', '/odometry/filtered_l2')
             ]
         ),
+
+        Node(
+            package='b2_thesis_fusion',
+            executable='path_tracker',
+            name='tracker_l2',
+            parameters=[{'odom_topic': '/odometry/filtered_l2', 'path_topic': '/trajectory/l2', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
+        ),
+
 
         Node(
             package='rviz2',

@@ -1,15 +1,28 @@
-"""Offline FASTLIO2 mapping pipeline for rosbag playback.
+"""
+Offline FASTLIO2 mapping pipeline for rosbag playback.
 
 This launch is designed for dense map building from recorded bags:
 - Starts FASTLIO2 under /fastlio2 namespace
+- Reinit static TFs with better alignment
+- Turned off /tf (odom -> base_link) from bag and allow FASTLIO2 to publish /tf with new static transforms
+- Starts ros2 bag play with only raw topics. 
+
 - Optionally starts PGO loop closure node
 - Optionally starts RViz with the PGO config
-- Optionally starts ros2 bag play with only raw topics
 
-Why filter bag topics:
-Some bags already contain /fastlio2 outputs from previous runs. Replaying those
-can mix old outputs with newly computed results, so this launch can replay only
-raw sensor + TF streams.
+Starting this launch u have to chose mode for bag playback:
+ - play_bag:=true (default) - will play your bag once
+ - bag_loop:=true - will play your bag in loop (implies play_bag behavior)
+You can't use both simultaneously!!!
+ 
+And also u have to provide path to your bag directory
+
+For example my command has the following form:
+ros2 launch b2_thesis_fusion fastlio_offline_mapping.launch.py bag_path:=/home/stringer/b2_ws/src/raw_bag/test_record_raw/'
+
+Command for saving maps (execute during bag playback)
+ros2 service call /pgo/save_maps interface/srv/SaveMaps "{file_path: '/home/stringer/b2_ws/src/b2_thesis_fusion/maps/fastlio2_maps', save_patches: false}"
+
 """
 
 from launch import LaunchDescription
@@ -134,6 +147,7 @@ def generate_launch_description() -> LaunchDescription:
             'ros2',
             'bag',
             'play',
+            '--delay', '3.0',      # <--- Added delay to allow nodes to start
             bag_path,
             '--clock',
             '--rate',
@@ -153,6 +167,7 @@ def generate_launch_description() -> LaunchDescription:
             'ros2',
             'bag',
             'play',
+            '--delay', '3.0',      # <--- Added delay to allow nodes to start
             bag_path,
             '--clock',
             '--rate',

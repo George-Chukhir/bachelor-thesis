@@ -20,7 +20,7 @@ install(TARGETS path_tracker
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch config rviz
+install(DIRECTORY launch config rviz maps
   DESTINATION share/${PROJECT_NAME}
 )
 

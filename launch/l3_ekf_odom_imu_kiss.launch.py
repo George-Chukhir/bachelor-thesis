@@ -8,14 +8,14 @@ from launch_ros.actions import Node
 def generate_launch_description():
     b2_fusion_dir = get_package_share_directory('b2_thesis_fusion')
 
-    # Аргументы 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     bag_path = LaunchConfiguration(
         'bag_path', 
         default='/home/stringer/b2_ws/src/raw_bag/test_record_raw' 
     )
     
-    rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'config_l1.rviz') 
+    ekf_config_l3 = os.path.join(b2_fusion_dir, 'config', 'ekf_l3.yaml')
+    rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'config_l3.rviz') 
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -30,11 +30,11 @@ def generate_launch_description():
         ),
 
         ExecuteProcess(
-            cmd=['ros2', 'bag', 'play', bag_path, '--clock', '--remap', '/tf_static:=/tf_static_old'],
+            cmd=['ros2', 'bag', 'play', bag_path, '--clock',  '--delay', '3.0', '--remap', '/tf_static:=/tf_static_old', '--remap', '/tf:=/tf_old'],
             output='screen'
         ),
 
-        
+
         ###
         #Static TFs
         ###
@@ -56,17 +56,52 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time}]
         ),
 
+        
+        ###
+        # l3 - Legged Odometry + IMU + KISS-ICP + EKF
+        ###
+
+        Node(
+            package='kiss_icp',
+            executable='kiss_icp_node',
+            name='kiss_icp_node',
+            remappings=[
+                ('pointcloud_topic', '/velodyne_points'),
+                ('odometry', '/kiss/odometry'),
+            ],
+            parameters=[{
+                'base_frame': 'base_link',
+                'lidar_odom_frame': 'odom',
+                'publish_odom_tf': False,
+                'data.max_range': 20.0,
+                'data.min_range': 0.5,
+                'data.deskew': True,
+                'position_covariance': 0.005,
+                'orientation_covariance': 0.005,
+            }],
+        ),
+
+
+        Node(
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node_l3',
+            output='screen',
+            parameters=[ekf_config_l3],
+            remappings=[
+                ('odometry/filtered', '/odometry/filtered_l3')
+            ]
+        ),
 
 
         Node(
             package='b2_thesis_fusion',
             executable='path_tracker',
-            name='tracker_l1',
-            parameters=[{'odom_topic': '/robot/base/odom', 'path_topic': '/trajectory/l1', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
+            name='tracker_l3',
+            parameters=[{'odom_topic': '/odometry/filtered_l3', 'path_topic': '/trajectory/l3', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
         ),
-        
 
-        # RViz
+
         Node(
             package='rviz2',
             executable='rviz2',
