@@ -49,6 +49,29 @@ def generate_launch_description():
         ),
 
         ###
+        # KISS-ICP Odometry
+        ###
+        Node(
+            package='kiss_icp',
+            executable='kiss_icp_node',
+            name='kiss_icp_node',
+            remappings=[
+                ('pointcloud_topic', '/velodyne_points'),
+                ('odometry', '/kiss/odometry'),
+            ],
+            parameters=[{
+                'base_frame': 'base_link',
+                'lidar_odom_frame': 'odom',
+                'publish_odom_tf': False,
+                'data.max_range': 20.0,
+                'data.min_range': 0.5,
+                'data.deskew': True,
+                'position_covariance': 0.005,
+                'orientation_covariance': 0.005,
+            }],
+        ),
+
+        ###
         # EKF L3 (local odometry fusion)
         ###
         Node(
