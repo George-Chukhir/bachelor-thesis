@@ -18,7 +18,7 @@ You can't use both simultaneously!!!
 And also u have to provide path to your bag directory
 
 For example my command has the following form:
-ros2 launch b2_thesis_fusion fastlio_offline_mapping.launch.py bag_path:=/home/stringer/b2_ws/src/raw_bag/test_record_raw/'
+ros2 launch b2_thesis_fusion fastlio_offline_mapping.launch.py bag_path:=/home/stringer/b2_ws/src/raw_bag/test_record_raw/
 
 Command for saving maps (execute during bag playback)
 ros2 service call /pgo/save_maps interface/srv/SaveMaps "{file_path: '/home/stringer/b2_ws/src/b2_thesis_fusion/maps/fastlio2_maps', save_patches: false}"

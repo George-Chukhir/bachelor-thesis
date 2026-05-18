@@ -14,7 +14,11 @@
   <depend>tf2_ros</depend>
   <depend>robot_localization</depend>
   <depend>ament_index_cpp</depend>
-
+  
+  <depend>pcl_conversions</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>libopencv-dev</depend>
+  <depend>libyaml-cpp-dev</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

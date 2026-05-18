@@ -12,12 +12,25 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(PCL REQUIRED COMPONENTS common io filters)
+find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 add_executable(path_tracker src/path_tracker_node.cpp)
 ament_target_dependencies(path_tracker rclcpp nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
 
-install(TARGETS path_tracker
+add_executable(pcd_to_2d src/pcd_to_2d.cpp)
+target_include_directories(pcd_to_2d PRIVATE ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(pcd_to_2d ${PCL_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
+
+install(TARGETS path_tracker pcd_to_2d
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  b2_thesis_fusion/lowstate_imu_bridge.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME lowstate_imu_bridge
 )
 
 install(DIRECTORY launch config rviz maps

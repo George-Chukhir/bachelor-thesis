@@ -10,7 +10,7 @@ Panels:
         - /World Cloud1
         - /LIO Path1
       Splitter Ratio: 0.5
-    Tree Height: 980
+    Tree Height: 644
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -18,7 +18,7 @@ Panels:
       - /2D Goal Pose1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.58
+    Splitter Ratio: 0.5799999833106995
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
@@ -28,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: World Cloud
 Visualization Manager:
   Class: ""
   Displays:
@@ -38,7 +38,7 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.03
+        Line Width: 0.029999999329447746
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -50,8 +50,7 @@ Visualization Manager:
       Plane Cell Count: 20
       Reference Frame: <Fixed Frame>
       Value: true
-
-    - Alpha: 0.45
+    - Alpha: 0.44999998807907104
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -73,7 +72,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 2
-      Size (m): 0.01
+      Size (m): 0.009999999776482582
       Style: Points
       Topic:
         Depth: 5
@@ -85,8 +84,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
-
-    - Alpha: 0.13
+    - Alpha: 0.12999999523162842
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -97,18 +95,18 @@ Visualization Manager:
       Class: rviz_default_plugins/PointCloud2
       Color: 255; 255; 255
       Color Transformer: Intensity
-      Decay Time: 300
+      Decay Time: 10
       Enabled: true
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 255
+      Max Intensity: 232
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: World Cloud
       Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 1
-      Size (m): 0.01
+      Size (m): 0.009999999776482582
       Style: Points
       Topic:
         Depth: 5
@@ -120,17 +118,16 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
       Color: 255; 85; 255
       Enabled: true
-      Head Diameter: 0.3
-      Head Length: 0.2
-      Length: 0.3
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
       Line Style: Billboards
-      Line Width: 0.03
+      Line Width: 0.029999999329447746
       Name: LIO Path
       Offset:
         X: 0
@@ -138,9 +135,9 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 255; 255
       Pose Style: None
-      Radius: 0.03
-      Shaft Diameter: 0.1
-      Shaft Length: 0.1
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -149,11 +146,37 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /fastlio2/lio_path
       Value: true
-
-    - Class: rviz_default_plugins/Odometry
-      Enabled: true
-      Name: LIO Odom
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz_default_plugins/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: false
       Keep: 200
+      Name: LIO Odom
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -161,8 +184,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /fastlio2/lio_odom
-      Value: true
-
+      Value: false
     - Class: rviz_default_plugins/TF
       Enabled: true
       Frame Timeout: 15
@@ -170,24 +192,35 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        imu_link:
+          Value: true
+        map:
+          Value: true
         odom:
           Value: true
         velodyne:
           Value: true
-      Marker Scale: 0.7
+      Marker Scale: 0.699999988079071
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
+      Tree:
+        map:
+          {}
+        odom:
+          base_link:
+            imu_link:
+              {}
+            velodyne:
+              {}
       Update Interval: 0
       Value: true
-
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: PGO Loops
       Namespaces:
-        pgo_edges: true
-        pgo_nodes: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -195,7 +228,6 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /pgo/loop_markers
       Value: true
-
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -211,6 +243,9 @@ Visualization Manager:
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
     - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -240,22 +275,32 @@ Visualization Manager:
     Current:
       Class: rviz_default_plugins/XYOrbit
       Distance: 20
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
       Focal Point:
         X: 0
         Y: 0
         Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
       Name: Current View
-      Pitch: 1.0
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 1
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz_default_plugins)
-      Yaw: 4.7
+      Yaw: 4.699999809265137
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1200
+  Height: 1016
   Hide Left Dock: false
   Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd0000000100000000000002fb0000039efc0200000005fb000000100044006900730070006c006100790073010000003d0000030f000000c900fffffffb0000001200530065006c0065006300740069006f006e00000001860000009d0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007300000001cd000000be0000005c00fffffffb0000000a00560069006500770073000000023900000144000000a400fffffffb0000000800540069006d00650100000352000000890000003900ffffff000004390000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -264,6 +309,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1900
-  X: 100
-  Y: 40
+  Width: 1850
+  X: 70
+  Y: 27
