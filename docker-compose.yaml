@@ -1,0 +1,21 @@
+services:
+  fusion:
+    build: 
+      context: ../..
+      dockerfile: src/b2_thesis_fusion/Dockerfile
+    container_name: fusion_container
+    image: fusion_image
+    stdin_open: true
+    tty: true
+    network_mode: "host"
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ../../src/raw_bag:/b2_ws/src/raw_bag:ro
+      - ./separate_trajectories:/b2_ws/src/b2_thesis_fusion/separate_trajectories:rw
+    command: >
+      bash -c "echo '=== B2 Thesis Fusion Environment (L1-L4) ===' &&
+               echo 'The container is ready.' &&
+               echo 'Bag files are mounted at /b2_ws/src/raw_bag' &&
+               echo 'Output TUMs will be saved to /b2_ws/src/b2_thesis_fusion/separate_trajectories' &&
+               bash"

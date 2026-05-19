@@ -1,6 +1,5 @@
 evo_env/
 .github/
-separate_trajectories/
 
 __pycache__/
 *.pyc

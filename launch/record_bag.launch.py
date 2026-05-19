@@ -6,7 +6,7 @@
 # terminal 2: ros2 lifecycle set /mocap4r2_optitrack_driver_node activate
 # ros2 topic list
 # ros2 topic hz /markers
-# ros2 bag record -o my_recording_bag /tf_static /tf /robot/base/odom /imu/data /imu/data_sync /velodyne_points /clock_sync/imu_sync_stats /clock_sync/vlp16_drift_ppm /clock_sync/vlp16_offset_ms /markers /rigid_bodies
+# ros2 bag record -o my_recording_bag /tf_static /tf /robot/base/odom /imu/data /imu/data_sync /velodyne_points /markers /rigid_bodies /clock_sync/imu_sync_stats /clock_sync/vlp16_drift_ppm /clock_sync/vlp16_offset_ms 
 
 import os
 from launch import LaunchDescription
