@@ -19,11 +19,14 @@ find_package(yaml-cpp REQUIRED)
 add_executable(path_tracker src/path_tracker_node.cpp)
 ament_target_dependencies(path_tracker rclcpp nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
 
+add_executable(mocap_to_tum src/mocap_to_tum_node.cpp)
+ament_target_dependencies(mocap_to_tum rclcpp geometry_msgs)
+
 add_executable(pcd_to_2d src/pcd_to_2d.cpp)
 target_include_directories(pcd_to_2d PRIVATE ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(pcd_to_2d ${PCL_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
-install(TARGETS path_tracker pcd_to_2d
+install(TARGETS path_tracker mocap_to_tum pcd_to_2d
   DESTINATION lib/${PROJECT_NAME}
 )
 
