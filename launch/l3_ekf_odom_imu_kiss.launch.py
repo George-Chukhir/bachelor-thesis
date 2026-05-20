@@ -11,11 +11,13 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     bag_path = LaunchConfiguration(
         'bag_path', 
-        default='/home/stringer/b2_ws/src/raw_bag/test_record_raw' 
+        default='/home/stringer/b2_ws/src/raw_bag/hangar/wifi_fourth_bag' 
     )
     
     ekf_config_l3 = os.path.join(b2_fusion_dir, 'config', 'ekf_l3.yaml')
     rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'config_l3.rviz') 
+
+    output_tum_file = '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/bag4_trajectories/l3_traj.tum'
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -28,6 +30,12 @@ def generate_launch_description():
             default_value=bag_path,
             description='Path to the raw rosbag'
         ),
+        DeclareLaunchArgument(
+        'output_tum_file',
+            default_value=output_tum_file,
+            description='Path to the output TUM file for the L3 trajectory'
+        ),
+
 
         ExecuteProcess(
             cmd=['ros2', 'bag', 'play', bag_path, '--clock', '--remap', '/tf_static:=/tf_static_old', '--remap', '/tf:=/tf_old'],
@@ -102,7 +110,7 @@ def generate_launch_description():
                          'path_topic': '/trajectory/l3', 
                          'frame_id': 'odom', 
                          'use_sim_time': use_sim_time, 
-                          'output_tum_file': '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/l3_traj.tum'}],
+                          'output_tum_file': output_tum_file}],
         ),
 
 

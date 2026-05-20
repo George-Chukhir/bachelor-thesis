@@ -12,7 +12,7 @@ def generate_launch_description():
     bag_path = LaunchConfiguration(
         'bag_path', 
         # here u can change the default path to your rosbag file 
-        default='/home/stringer/b2_ws/src/raw_bag/test_record_raw' 
+        default='/home/stringer/b2_ws/src/raw_bag/hangar/wifi_test_record_first' 
     )
     
     rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'vlp16_view.rviz')

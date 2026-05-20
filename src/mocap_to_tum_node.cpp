@@ -1,5 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <mocap4r2_msgs/msg/rigid_bodies.hpp>
 #include <fstream>
 #include <iomanip>
 #include <string>
@@ -7,7 +7,7 @@
 
 /*
     // maybe change topic name
-    ros2 run b2_thesis_fusion mocap_to_tum --ros-args -p topic_name:=/mocap/rigid_bodies/robot/pose -p output_file:=/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/mocap_gt.tum
+    ros2 run b2_thesis_fusion mocap_to_tum --ros-args -p topic_name:=/rigid_bodies -p output_file:=/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/mocap_gt.tum
 
 */
 
@@ -29,7 +29,7 @@ public:
             RCLCPP_INFO(this->get_logger(), "Listening to %s and writing to %s", topic_name.c_str(), output_file.c_str());
         }
 
-        subscription_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+        subscription_ = this->create_subscription<mocap4r2_msgs::msg::RigidBodies>(
             topic_name, 10,
             std::bind(&MocapToTumNode::poseCallback, this, std::placeholders::_1));
     }
@@ -42,23 +42,24 @@ public:
     }
 
 private:
-    void poseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+    void poseCallback(const mocap4r2_msgs::msg::RigidBodies::SharedPtr msg)
     {
-        if (file_.is_open()) {
+        if (file_.is_open() && !msg->rigidbodies.empty()) {
+            const auto& pose = msg->rigidbodies[0].pose;
             double time_sec = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
             file_ << std::fixed << std::setprecision(9) << time_sec << " "
-                  << msg->pose.position.x << " "
-                  << msg->pose.position.y << " "
-                  << msg->pose.position.z << " "
-                  << msg->pose.orientation.x << " "
-                  << msg->pose.orientation.y << " "
-                  << msg->pose.orientation.z << " "
-                  << msg->pose.orientation.w << "\n";
+             << pose.position.x << " "
+             << pose.position.z << " "  // ROS Y <- Mocap Z
+             << pose.position.y << " "  // ROS Z <- Mocap Y (Высота)
+             << pose.orientation.x << " "
+             << pose.orientation.z << " " // Кватернионы тоже лучше свапнуть для консистентности
+             << pose.orientation.y << " "
+             << pose.orientation.w << "\n";
         }
     }
 
     std::ofstream file_;
-    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr subscription_;
+    rclcpp::Subscription<mocap4r2_msgs::msg::RigidBodies>::SharedPtr subscription_;
 };
 
 int main(int argc, char *argv[])

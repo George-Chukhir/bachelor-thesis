@@ -16,9 +16,10 @@ int main(int argc, char** argv) {
     (void)argc;
     (void)argv;
 
+    // /home/stringer/b2_ws/src/b2_thesis_fusion/maps/fastlio2_maps/map_bag_4/map.pcd
     std::string pkg_dir = "/home/stringer/b2_ws/src/b2_thesis_fusion/maps";
-    std::string pcd_file = pkg_dir + "/fastlio2_maps/map.pcd";
-    std::string map_name = pkg_dir + "/2d_maps/2d_map";
+    std::string pcd_file = pkg_dir + "/fastlio2_maps/map_bag_4/map.pcd";
+    std::string map_name = pkg_dir + "/2d_maps/map_bag_4"; 
     
     double resolution = 0.05; // 5 cm per pixel
     double z_min = 0.2;
