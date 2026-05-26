@@ -18,10 +18,10 @@ find_package(OpenCV REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 add_executable(path_tracker src/path_tracker_node.cpp)
-ament_target_dependencies(path_tracker rclcpp nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+ament_target_dependencies(path_tracker rclcpp nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs mocap4r2_msgs)
 
 add_executable(mocap_to_tum src/mocap_to_tum_node.cpp)
-ament_target_dependencies(mocap_to_tum rclcpp mocap4r2_msgs)
+ament_target_dependencies(mocap_to_tum rclcpp mocap4r2_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 add_executable(pcd_to_2d src/pcd_to_2d.cpp)
 target_include_directories(pcd_to_2d PRIVATE ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
