@@ -6,12 +6,12 @@ The project implements a hierarchical sensor fusion architecture for the Unitree
 
 ## Features
 
-The architecture is divided into 4 localization levels (L1 - L4) to perform a detailed ablation study:
+The architecture is divided into 4 localization levels (L1 - L4) to perform a detailed фablation study, alongside a dedicated mapping module:
 - **L1 (Base Odometry):** Internal Unitree SDK kinematics and IMU (Black-box).
 - **L2 (Local Fusion):** 2D Kinematics fused with raw external IMU data using an Extended Kalman Filter (EKF).
-- **L3 (LiDAR-Inertial Odometry):** Fusion of L2 with 3D LiDAR data (Velodyne VLP-16) using **KISS-ICP** / **FastLIO2**.
+- **L3 (LiDAR-Inertial Odometry):** Fusion of L2 with 3D LiDAR data (Velodyne VLP-16) using **KISS-ICP**.
 - **L4 (Global Localization):** L3 odometry corrected globally against a pre-built map using **AMCL** (Adaptive Monte Carlo Localization).
-
+- **3D Mapping:** Creation of high-quality 3D point cloud maps of the environment using **FastLIO2**.
 ## Prerequisites
 
 To run this project natively, you need the following environment:
@@ -29,7 +29,7 @@ mkdir -p ~/b2_ws/src
 cd ~/b2_ws/src
 
 # 2. Clone this repository
-git clone <YOUR_GITHUB_REPOSITORY_URL> b2_thesis
+git clone https://github.com/George-Chukhir/bachelor-thesis.git b2_thesis
 
 # 3. Install dependencies using rosdep
 cd ~/b2_ws
@@ -38,3 +38,33 @@ rosdep install --from-paths src --ignore-src -r -y
 
 # 4. Build the workspace
 colcon build --symlink-install
+
+## Usage (Replication Manual)
+
+After building, source your workspace to use the launch files.
+
+```bash
+source ~/b2_ws/install/setup.bash
+```
+
+### Running the Fusion (Example for L3)
+
+**Terminal:** Launch the localization stack.
+
+```bash
+ros2 launch b2_thesis_fusion l3_fusion.launch.py 
+```
+
+### Trajectory Evaluation
+
+Once the rosbag finishes playing, you can quantitatively analyze the estimated trajectory against the Ground Truth (MoCap) using the `evo` package:
+
+```bash
+evo_ape tum mocap_gt.tum l3_traj.tum -p
+```
+
+## About the Author
+- **Author:** Heorhii Chukhir
+- **Supervisor:** Ing. Martin Lučan
+- **Institution:** Slovak University of Technology in Bratislava (STU FEI), Institute of Robotics and Cybernetics.
+- **Industry Partner:** Panza Robotics s.r.o.
