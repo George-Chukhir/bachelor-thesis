@@ -1,4 +1,5 @@
 import os
+from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -8,17 +9,30 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 def generate_launch_description():
 
+    b2_fusion_dir = get_package_share_directory('b2_thesis_fusion')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     
     bag_path = LaunchConfiguration(
         'bag_path', 
-        default='/home/stringer/b2_ws/src/raw_bag/test_record_raw' 
+        default='/home/stringer/b2_ws/src/raw_bag/hangar/wifi_third_bag' 
     )
+
+    output_tum_file = '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/bag3_trajectories/kiss_izolated_voxel_0_05_count_3.tum'
+
+
+    rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'kiss_izolated.rviz') 
+
     
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
         DeclareLaunchArgument('bag_path', default_value=bag_path),
+
+         DeclareLaunchArgument(
+        'output_tum_file',
+            default_value=output_tum_file,
+            description='Path to the output TUM file for the L3 trajectory'
+        ),
 
         ExecuteProcess(
             cmd=['ros2', 'bag', 'play', bag_path, '--clock', 
@@ -39,9 +53,13 @@ def generate_launch_description():
                 'base_frame': 'base_link',
                 'lidar_odom_frame': 'odom',
                 'publish_odom_tf': True,
-                'data.max_range': 20.0,
-                'data.min_range': 0.5,
-                'data.deskew': False,
+                'data.max_range': 40.0,
+                'data.min_range': 0.8,
+                'data.deskew': True,
+                'data.voxel_size': 0.05,
+                'max_points_per_voxel': 3,
+                'position_covariance': 0.1,
+                'orientation_covariance': 0.1,
             }],
         ),
           Node(
@@ -58,7 +76,7 @@ def generate_launch_description():
             package='tf2_ros',
             executable='static_transform_publisher',
             name='correct_velodyne_tf',
-            arguments=['0.3', '0.0', '0.4', '0.0', '0.0', '0.0', 'base_link', 'velodyne'],
+            arguments=['0.4', '0.0', '0.3', '0.0', '0.0', '0.0', 'base_link', 'velodyne'],
             parameters=[{'use_sim_time': use_sim_time}]
         ),
 
@@ -67,15 +85,20 @@ def generate_launch_description():
             package='rviz2',
             executable='rviz2',
             name='rviz2',
-            # arguments=['-d', rviz_config_file],
+            arguments=['-d', rviz_config_file],
             parameters=[{'use_sim_time': use_sim_time}],
             output='screen'
         ),
-                Node(
+        Node(
             package='b2_thesis_fusion',
             executable='path_tracker',
             name='tracker_l2',
-            parameters=[{'odom_topic': '/kiss/odometry', 'path_topic': '/trajectory/kiss/isolated', 'frame_id': 'odom', 'use_sim_time': use_sim_time}],
+            parameters=[{'odom_topic': '/kiss/odometry',
+                         'path_topic': '/trajectory/kiss/isolated', 
+                         'frame_id': 'odom', 
+                         'use_sim_time': use_sim_time, 
+                         'output_tum_file': output_tum_file,
+                         'marker_yaw_offset': 4.48}],
         ),
 
     ])

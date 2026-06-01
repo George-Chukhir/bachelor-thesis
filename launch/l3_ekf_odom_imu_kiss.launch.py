@@ -11,11 +11,13 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     bag_path = LaunchConfiguration(
         'bag_path', 
-        default='/home/stringer/b2_ws/src/raw_bag/test_record_raw' 
+        default='/home/stringer/b2_ws/src/raw_bag/hangar/wifi_third_bag' 
     )
     
     ekf_config_l3 = os.path.join(b2_fusion_dir, 'config', 'ekf_l3.yaml')
     rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'config_l3.rviz') 
+
+    output_tum_file = '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/bag3_trajectories/l3_traj_new_kiss.tum'
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -28,6 +30,12 @@ def generate_launch_description():
             default_value=bag_path,
             description='Path to the raw rosbag'
         ),
+        DeclareLaunchArgument(
+        'output_tum_file',
+            default_value=output_tum_file,
+            description='Path to the output TUM file for the L3 trajectory'
+        ),
+
 
         ExecuteProcess(
             cmd=['ros2', 'bag', 'play', bag_path, '--clock', '--remap', '/tf_static:=/tf_static_old', '--remap', '/tf:=/tf_old'],
@@ -52,7 +60,7 @@ def generate_launch_description():
             package='tf2_ros',
             executable='static_transform_publisher',
             name='correct_velodyne_tf',
-            arguments=['0.3', '0.0', '0.4', '0.0', '0.0', '0.0', 'base_link', 'velodyne'],
+            arguments=['0.4', '0.0', '0.3', '0.0', '0.0', '0.0', 'base_link', 'velodyne'],
             parameters=[{'use_sim_time': use_sim_time}]
         ),
 
@@ -73,11 +81,13 @@ def generate_launch_description():
                 'base_frame': 'base_link',
                 'lidar_odom_frame': 'odom',
                 'publish_odom_tf': False,
-                'data.max_range': 20.0,
-                'data.min_range': 0.5,
+                'data.max_range': 40.0,
+                'data.min_range': 0.8,
                 'data.deskew': True,
-                'position_covariance': 0.005,
-                'orientation_covariance': 0.005,
+                'data.voxel_size': 0.05,
+                'max_points_per_voxel': 3,
+                'position_covariance': 0.075,
+                'orientation_covariance': 0.1,
             }],
         ),
 
@@ -102,7 +112,8 @@ def generate_launch_description():
                          'path_topic': '/trajectory/l3', 
                          'frame_id': 'odom', 
                          'use_sim_time': use_sim_time, 
-                          'output_tum_file': '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/l3_traj.tum'}],
+                          'output_tum_file': output_tum_file,
+                           'marker_yaw_offset': 4.48}],
         ),
 
 

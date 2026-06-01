@@ -11,16 +11,28 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     bag_path = LaunchConfiguration(
         'bag_path', 
-        default='/home/stringer/b2_ws/src/raw_bag/test_record_raw' 
+        default='/home/stringer/b2_ws/src/raw_bag/hangar/wifi_fourth_bag' 
     )
     
     rviz_config_file = os.path.join(b2_fusion_dir, 'rviz', 'config_l4.rviz')
 
     ekf_config_l3 = os.path.join(b2_fusion_dir, 'config', 'ekf_l3.yaml')
 
+    output_tum_file = '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/bag4_trajectories/l4_traj.tum'
+
+    yaml_filename = '/home/stringer/b2_ws/src/b2_thesis_fusion/maps/2d_maps/map_bag_4/map_bag_4.yaml'
+
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
         DeclareLaunchArgument('bag_path', default_value=bag_path),
+
+        DeclareLaunchArgument('output_tum_file', 
+                              default_value=output_tum_file, 
+                              description='Path to the output TUM file for the L4 trajectory'),
+
+        DeclareLaunchArgument('yaml_filename', 
+                              default_value=yaml_filename, 
+                              description='Path to the YAML file for the 2D map'),
 
         # 1. ROSBag (Legged odometry, IMU, LiDAR)
         ExecuteProcess(
@@ -92,7 +104,7 @@ def generate_launch_description():
                 'frame_id': 'map', 
                 'robot_frame': 'base_link',
                 'use_sim_time': use_sim_time,
-                'output_tum_file': '/home/stringer/b2_ws/src/b2_thesis_fusion/separate_trajectories/l4_traj.tum' 
+                'output_tum_file': output_tum_file 
             }],   
         ),
 
@@ -105,7 +117,7 @@ def generate_launch_description():
             executable='map_server',
             name='map_server',
             parameters=[{
-                'yaml_filename': os.path.join(b2_fusion_dir, 'maps', '2d_maps', '2d_map.yaml'),
+                'yaml_filename': yaml_filename,
                 'use_sim_time': use_sim_time
             }]
         ),

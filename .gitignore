@@ -9,3 +9,6 @@ install/
 log/
 
 commands.txt
+
+# separate_trajectories/
+# maps/
