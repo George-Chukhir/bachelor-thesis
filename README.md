@@ -55,8 +55,33 @@ source ~/b2_ws/install/setup.bash
 ros2 launch b2_thesis_fusion l3_fusion.launch.py 
 ```
 
-### Trajectory Evaluation
+## Evaluation Setup (evo)
 
+To analyze trajectories using the `evo` tools, set up the specific virtual environment inside the `separate_trajectories` directory:
+
+1. **Navigate to the target directory:**
+   ```bash
+   cd separate_trajectories
+   ```
+
+2. **Create the virtual environment named `evo_env`:**
+   ```bash
+   python3 -m venv evo_env
+   ```
+   
+3. **Activate the environment:**
+   ```bash
+   source evo_env/bin/activate
+   ```
+
+4. **Install the required dependencies:**
+   *Note: Ensure you point to the correct requirements file located in the project root.*
+   ```bash
+   pip install --upgrade pip
+   pip install -r ../evo_requirements.txt
+
+
+### Trajectory Evaluation
 Once the rosbag finishes playing, you can quantitatively analyze the estimated trajectory against the Ground Truth (MoCap) using the `evo` package:
 
 ```bash
